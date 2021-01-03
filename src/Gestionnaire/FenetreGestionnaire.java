@@ -10,18 +10,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.NumberFormat;
+
 import static java.lang.Boolean.TRUE;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTree;
+
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -35,6 +28,8 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
 
     public JMenu menu;
     public JMenu menu2;
+    public boolean isSelected = false;
+    public String selectedObjectName = "";
 
     public JTree tree;
     public String L;
@@ -61,16 +56,16 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
         menu2.add(i4);
         menu2.add(i5);
         menu2.add(i6);
-        //  menu.add(submenu);
+
         JPanel p1 = new JPanel();
         JPanel p = new JPanel();
         JPanel p2 = new JPanel();
         JPanel p3 = new JPanel();
+
         setVisible(true);
         setJMenuBar(mb);
         setLayout(new GridLayout(2, 2));
         setVisible(true);
-
         //add(p2) ;
 
         i1.addActionListener(this);
@@ -79,19 +74,99 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
         i4.addActionListener(this);
         i5.addActionListener(this);
         i6.addActionListener(this);
-        JLabel j = new JLabel("Details article menu ");
-        j.setBounds(100,100,100,100);
-        JLabel j1 = new JLabel("Nom :");
-        JLabel j2 = new JLabel("Tarif :");
-        JLabel j3 = new JLabel("Article :");
-        JTextField F1 = new JTextField();
-        F1.setBounds(100, 100, 100, 100);
-        p3.add(j);
-        p3.add(j1);
-        p3.add(j2);
-        p3.add(j3);
 
-        p3.setLayout(new GridLayout(4, 4));
+        DefaultListModel<String> l1 = new DefaultListModel<>();
+        JList<String> list = new JList<>(l1);
+        list.setBounds(100  , 100, 100, 100);
+        p.add(list);
+//        list.addKeyListener(new KeyAdapter() {
+//            public void keyPressed(KeyEvent e) {
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+//                    // String  text =  e.getSelectedValue().toString();
+//
+//                }
+//            }
+//        });
+
+        // Creating a panel specified to contain labels
+        JPanel labelsPanel = new JPanel();
+
+        // Setting labelsPanel Layout to be a vertical box
+        BoxLayout boxLayout = new BoxLayout(labelsPanel,BoxLayout.Y_AXIS);
+        labelsPanel.setLayout(boxLayout);
+
+        // Details Label definition && making a space which height = 15px
+        JLabel details = new JLabel("Details article menu ");
+        labelsPanel.add(details);
+        labelsPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // Name Label definition && making a space which height = 15px
+        JLabel name = new JLabel("Nom :");
+        labelsPanel.add(name);
+        labelsPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // Tarif Label definition && making a space which height = 15px
+        JLabel tarif = new JLabel("Tarif :");
+        labelsPanel.add(tarif);
+        labelsPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // Article Label definition && making a space which height = 5 because it's the last element
+        JLabel article = new JLabel("Article :");
+        labelsPanel.add(article);
+        labelsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+
+        // Creating a panel specified to contain quantify label and quantity textfield
+        JPanel quantPanel = new JPanel();
+
+        // Setting quantPanel Layout to be a horizantal box
+        quantPanel.setLayout(new BoxLayout(quantPanel, BoxLayout.X_AXIS));
+
+        // Creating quantity label and adding it to quantPanel && making some horizantal space = 15
+        String label = "Quantite: ";
+        JLabel l = new JLabel(label, JLabel.HORIZONTAL);
+        quantPanel.add(l);
+        labelsPanel.add(Box.createRigidArea(new Dimension(15, 10)));
+
+        // Creating a new textfield to contain quantity input and attaching it to quantLabel
+        JTextField textField = new JTextField(10);
+        l.setLabelFor(textField);
+        textField.setMaximumSize(new Dimension(300,
+                30));
+        quantPanel.add(textField);
+
+        // Ensure that quantPanel components are attached to LEFT
+        quantPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Creating a new vertical box layout to contain the other two boxes
+        BoxLayout bigBoxLayout = new BoxLayout(p3,BoxLayout.Y_AXIS);
+        p3.setLayout(bigBoxLayout);
+
+        // Adding the two boxes to the main p3 panel
+        p3.add(labelsPanel);
+        p3.add(quantPanel);
+
+        // Adding the add button layout
+        JButton addButton = new JButton();
+        addButton.setText("Ajouter");
+        p3.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        // Setting the add button action
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (isSelected && textField.getText() != null && textField.getText() != "" && !textField.getText().isBlank() ) {
+                    try {
+                        double quantity = Double.parseDouble(textField.getText());
+                        l1.addElement(textField.getText() + " * " + selectedObjectName);
+                    } catch (NumberFormatException numberFormatException) {
+                        System.out.println("Number Convertion exception raised: " + numberFormatException);
+                        numberFormatException.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        p3.add(addButton);
+
 
         tree = new JTree(this.read());
         add(new JScrollPane(tree));
@@ -99,8 +174,7 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
         add(p);
         add(p1);
         tree.setVisible(TRUE);
-        setBounds(500, 500,500,500);
-        setSize(200, 200);
+        setSize(2250, 750);
         setResizable(true);
         setLocationRelativeTo(null);
 
@@ -111,32 +185,21 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
                 if (node == null) {
                     return;
                 }
-                Object nodeInfo = node.getUserObject();
-                if (node.isLeaf()) {
-                    System.out.println("feuille");
-                    System.out.println(e.getPath().toString());
-                } else {
-                    System.out.println("noeud");
-                    System.out.println(e.getPath().toString());
-                }
-            }
-        });
-        DefaultListModel<String> l1 = new DefaultListModel<>();
-        l1.addElement("Item1");
-        l1.addElement("Item2");
-        l1.addElement("Item3");
-        l1.addElement("Item4");
-        JList<String> list = new JList<>(l1);
-        list.setBounds(100  , 100, 100, 100);
-        p.add(list);
-        list.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    // String  text =  e.getSelectedValue().toString();
 
+                isSelected = false;
+
+                Object path = e.getPath().getLastPathComponent();
+                if (node.isLeaf()) {
+                    selectedObjectName = path.toString();
+                    article.setText("Article : " + selectedObjectName);
+                    isSelected = true;
+                } else {
+                    name.setText("Nom : " + path.toString());
+                    article.setText("Article : ");
                 }
             }
         });
+
         //add(new JScrollPane(tree));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("JTree Example");
@@ -154,7 +217,7 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
             troot.removeAllChildren();
             ttmodel.reload();
         }
-       if (e.getActionCommand().toString() == "Importer") {
+        if (e.getActionCommand().toString() == "Importer") {
             System.out.println("Importer");
         }
 
@@ -163,33 +226,35 @@ public final class FenetreGestionnaire extends JFrame implements ActionListener 
 
     public DefaultMutableTreeNode read() throws IOException {
         DefaultMutableTreeNode menu = new DefaultMutableTreeNode("menu");
-        DefaultMutableTreeNode boisson = null;     // Level 1 in Hierarchy
-        DefaultMutableTreeNode boissonfroid = null;  // Level 2 in Hierarchy
-        DefaultMutableTreeNode sandwish = null;
-        DefaultMutableTreeNode plat = null;
+        DefaultMutableTreeNode article = null;     // Level 1 in Hierarchy
 
-        File file = new File("/Users/mohamedalibelhadj/Desktop/drinks.txt");
+//        File file = new File(pathToFile);
+        JFileChooser chooser = new JFileChooser();
+        int returnVal = chooser.showOpenDialog(null); //replace null with your swing container
+        File file;
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            file = chooser.getSelectedFile();
+            BufferedReader buffer = new BufferedReader(new FileReader(file));
+            String strLine;
+            String[] result;
 
-        BufferedReader buffer = new BufferedReader(new FileReader(file));
-        String strLine;
-        String[] result;
-
-        while ((strLine = buffer.readLine()) != null)   {
-            result =  strLine.split(":");
-            for(int i = 0; i < result.length; i++) {
-                if (i == 0)
-                {
-                    boisson = new DefaultMutableTreeNode(result[i]);
+            while ((strLine = buffer.readLine()) != null) {
+                result = strLine.split(":");
+                for (int i = 0; i < result.length; i++) {
+                    if (i == 0) {
+                        article = new DefaultMutableTreeNode(result[i]);
+                    } else {
+                        article.add(new DefaultMutableTreeNode(result[i]));
+                    }
+                    menu.add(article);
                 }
-                else
-                {
-                    boisson.add(new DefaultMutableTreeNode(result[i]));
-                }
-                menu.add(boisson) ;
             }
+            buffer.close();
+            return (menu);
         }
-
-        buffer.close();
-        return (menu);
+        else
+        {
+            return new DefaultMutableTreeNode();
+        }
     }
 }
